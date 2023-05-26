@@ -26,5 +26,4 @@ Map over our current board props and
 Create a new row for each row in the board (give each row a unique key)
 Within each row, we can create a cell for each value
 Create a new component cell to take in the type of cell (cell options we created earlier in types.tsx)
-
 */
