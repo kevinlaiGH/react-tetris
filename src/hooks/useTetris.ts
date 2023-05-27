@@ -28,6 +28,9 @@ export function useTetris(){
   }, [dispatchBoardState])
 
   useInterval(() => {
+    if (!isPlaying){
+      return
+    }
     gameTick();
   }, tickSpeed)
 
