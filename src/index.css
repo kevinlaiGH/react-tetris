@@ -27,6 +27,13 @@ h1{
   display: flex
 }
 
+.upcoming {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .cell {
   width: 30px;
   aspect-ratio: 1;
