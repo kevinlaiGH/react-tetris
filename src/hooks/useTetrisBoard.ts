@@ -16,7 +16,6 @@ export function useTetrisBoard(): [BoardState, Dispatch<Action>]{
     droppingColumn: 0,
     droppingBlock: Block.I,
     droppingShape: SHAPES.I.shape,
-
   }, (emptyState) => {
     const state = {...emptyState, board: getEmptyBoard()}
     return state
@@ -93,8 +92,21 @@ function boardReducer(state: BoardState, action: Action): BoardState {
         droppingShape: state.droppingShape
       }
     case 'move':
+      const rotatedShape = action.isRotating ? rotateBlock[newState.droppingShape] : newState.droppingShape
+      let columnOffset = action.isPressingLeft ? -1 : 0;
+      columnOffset = action.isPressingRight ? 1 : columnOffset;
+      if (!hasCollisions(newState.board, rotatedShape, newState.droppingRow, newState.droppingColumn + columnOffset))
+      break;
     default:
-      const unhandledType: any = action.type;
+      const unhandledType: never = action.type;
       throw new Error(`Unhandled action type: ${unhandledType}`)
   }
+}
+
+function rotateBlock(shape: BlockShape): BlockShape{
+  const rows = shape.length;
+  const columns = shape[0].length;
+  const rotated = Array(rows).fill(null).map(() => Array(columns).fill(false))
+
+  return rotated
 }

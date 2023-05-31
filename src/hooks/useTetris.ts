@@ -1,11 +1,12 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect, KeyboardEvent } from 'react';
 import { useInterval } from './useInterval';
 import { Block, BlockShape, BoardShape} from '../types';
 import { getRandomBlock, hasCollisions, useTetrisBoard } from "./useTetrisBoard";
 
 enum TickSpeed {
   Normal= 800,
-  Sliding = 100
+  Sliding = 100,
+  Fast = 50
 }
 
 export function useTetris(){
@@ -76,6 +77,58 @@ export function useTetris(){
     }
     gameTick();
   }, tickSpeed)
+
+  useEffect(() => {
+    if(!isPlaying){
+      return
+    }
+    let isPressingLeft = false;
+    let isPressingRight = false;
+    let moveIntervalID: number | undefined;
+
+    const updateMovementInterval = () => {
+      clearInterval(moveIntervalID);
+      dispatchBoardState({
+        type: 'move',
+        isPressingLeft,
+        isPressingRight,
+      });
+      moveIntervalID = setInterval(() => {
+        dispatchBoardState({
+          type: 'move',
+          isPressingLeft,
+          isPressingRight,
+        });
+      }, 300);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if(event.repeat){
+        return;
+      }
+      if (event.key === 'ArrowDown'){
+        setTickSpeed(TickSpeed.Fast)
+      }
+      if (event.key === "ArrowUp"){
+        dispatchBoardState({
+          type: 'move',
+          isRotating: true
+        })
+      }
+      if (event.key === "ArrowLeft"){
+        isPressingLeft = true;
+        updateMovementInterval();
+      }
+      if (event.key === "ArrowRight"){
+        isPressingRight = true;
+        updateMovementInterval();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isPlaying])
 
   const renderedBoard = structuredClone(board) as BoardShape
   if (isPlaying){
