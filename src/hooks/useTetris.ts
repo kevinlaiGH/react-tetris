@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect, KeyboardEvent } from 'react';
 import { useInterval } from './useInterval';
-import { Block, BlockShape, BoardShape} from '../types';
-import { getRandomBlock, hasCollisions, useTetrisBoard } from "./useTetrisBoard";
+import { Block, BlockShape, BoardShape, EmptyCell} from '../types';
+import { BOARD_HEIGHT, getRandomBlock, hasCollisions, useTetrisBoard } from "./useTetrisBoard";
 
 enum TickSpeed {
   Normal= 800,
@@ -10,6 +10,7 @@ enum TickSpeed {
 }
 
 export function useTetris(){
+  const [score, setScore] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [tickSpeed, setTickSpeed] = useState<TickSpeed | null>(null);
   const [isCommitting, setIsCommitting] = useState(false);
@@ -29,9 +30,19 @@ export function useTetris(){
 
     const newBoard = structuredClone(board) as BoardShape
     addShapeToBoard(newBoard, droppingBlock, droppingShape, droppingRow, droppingColumn)
+
+    let numCleared = 0
+    for (let row= BOARD_HEIGHT - 1; row >= 0; row--){
+      if(newBoard[row].every((entry) => entry !== EmptyCell.Empty)){
+        numCleared++;
+        newBoard.splice(row, 1);
+      }
+    }
+
     const newUpcomingBlocks = structuredClone(upcomingBlocks) as Block[]
     const newBlock = newUpcomingBlocks.pop()
     newUpcomingBlocks.unshift(getRandomBlock())
+    setScore((prevScore) => prevScore + getPoints(numCleared))
     setTickSpeed(TickSpeed.Normal)
     setUpcomingBlocks(newUpcomingBlocks)
     dispatchBoardState({type: 'commit', newBoard, newBlock})
@@ -66,6 +77,7 @@ export function useTetris(){
       getRandomBlock()
     ]
     setUpcomingBlocks(startingBlocks)
+    setScore(0);
     setIsPlaying(true);
     setTickSpeed(TickSpeed.Normal),
     dispatchBoardState({type: 'start'})
@@ -166,4 +178,21 @@ function addShapeToBoard(
         }
       });
     });
+}
+
+function getPoints(numCleared: number): number{
+  switch(numCleared){
+    case 0:
+      return 0;
+    case 1:
+      return 100;
+    case 2:
+      return 300;
+    case 3:
+      return 500;
+    case 4:
+      return 800;
+    default:
+      throw new Error("Unexpected number of rows cleared")
+  }
 }

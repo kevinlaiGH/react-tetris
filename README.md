@@ -11,3 +11,6 @@ Todos:
 - [ ] Create state for storing score
 - [ ] Detect when the game is over
 - [ ] Show upcoming blocks
+- [ ] Keep score and delete lines whenever they are completed filled
+      - add state for a score
+
